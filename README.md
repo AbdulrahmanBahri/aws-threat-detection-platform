@@ -33,26 +33,6 @@ Main goal:
 
 Don't break a working system.
 
-## Biggest learning — private doesn't mean disconnected
-
-One of the most interesting problems appeared when I moved the EC2 instance into a private subnet.
-
-Systems Manager couldn't reach the instance.
-
-What I learned:
-
-* private resources still need access to AWS services
-* VPC Endpoints can replace NAT Gateways in some scenarios
-* Session Manager provides secure administration without SSH or public IPs
-
-## Biggest learning — normalize events, not services
-
-GuardDuty and Security Hub generate different event formats.
-
-Instead of writing service-specific logic everywhere, I introduced a normalization layer so the platform processes a common finding structure.
-
-This made the system easier to extend and reason about.
-
 ## If I scale this
 
 I'd add:
