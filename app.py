@@ -11,25 +11,29 @@ app = cdk.App()
 
 env = cdk.Environment(
     account="478561403051",
-    region="us-east-1"
+    region="us-east-1",
 )
 
 networking_stack = NetworkingStack(
     app,
     "ThreatDetectionNetworkingStack",
-    env=env
+    env=env,
 )
 
 security_services_stack = SecurityServicesStack(
     app,
     "ThreatDetectionSecurityServicesStack",
-    env=env
+    env=env,
 )
 
 monitoring_stack = MonitoringStack(
     app,
     "ThreatDetectionMonitoringStack",
-    env=env
+    findings_processor=security_services_stack.findings_processor,
+    env=env,
 )
+
+security_services_stack.add_dependency(networking_stack)
+monitoring_stack.add_dependency(security_services_stack)
 
 app.synth()

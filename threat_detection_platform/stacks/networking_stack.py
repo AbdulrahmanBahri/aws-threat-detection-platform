@@ -4,6 +4,7 @@ from aws_cdk import (
     RemovalPolicy,
 )
 from aws_cdk import aws_ec2 as ec2
+from aws_cdk import aws_iam as iam
 from aws_cdk import aws_logs as logs
 from constructs import Construct
 
@@ -104,6 +105,31 @@ class NetworkingStack(Stack):
             traffic_type=ec2.FlowLogTrafficType.ALL,
         )
 
+        ec2_role = iam.Role(
+            self,
+            "ThreatDetectionEC2Role",
+            assumed_by=iam.ServicePrincipal("ec2.amazonaws.com"),
+        )
+
+        ec2_role.add_managed_policy(
+            iam.ManagedPolicy.from_aws_managed_policy_name(
+                "AmazonSSMManagedInstanceCore"
+            )
+        )
+
+        instance = ec2.Instance(
+            self,
+            "ThreatDetectionPrivateEC2",
+            vpc=self.vpc,
+            vpc_subnets=ec2.SubnetSelection(
+                subnet_type=ec2.SubnetType.PRIVATE_ISOLATED
+            ),
+            security_group=self.private_ec2_security_group,
+            role=ec2_role,
+            instance_type=ec2.InstanceType("t3.micro"),
+            machine_image=ec2.MachineImage.latest_amazon_linux2023(),
+        )
+
         CfnOutput(
             self,
             "VpcId",
@@ -114,4 +140,16 @@ class NetworkingStack(Stack):
             self,
             "PrivateEC2SecurityGroupId",
             value=self.private_ec2_security_group.security_group_id,
+        )
+
+        CfnOutput(
+            self,
+            "InstanceId",
+            value=instance.instance_id,
+        )
+
+        CfnOutput(
+            self,
+            "PrivateIp",
+            value=instance.instance_private_ip,
         )
